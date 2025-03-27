@@ -1,19 +1,17 @@
-// Root layout - share UI between multiple routes
+// Root layout - share UI between multiple routes.
 // https://docs.expo.dev/develop/file-based-routing/#root-layout
-
-import { Text } from 'react-native';
 
 import {
   Slot, // renders the currently selected route (similar to `children` in React).
+  Stack,
 } from 'expo-router';
 
 const RootLayout = () => {
   return (
-    <>
-      <Text>Header</Text>
-      <Slot />
-      <Text>Footer</Text>
-    </>
+    <Stack screenOptions={{ headerShown: false }}>
+      <Stack.Screen name='index' />
+      <Stack.Screen name='profile' />
+    </Stack>
   );
 };
 export default RootLayout;
