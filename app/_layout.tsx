@@ -1,12 +1,18 @@
 // Root layout - share UI between multiple routes.
 // https://docs.expo.dev/develop/file-based-routing/#root-layout
+//
+// NOTE: This is the initial client file (entry point).
+// https://docs.expo.dev/router/installation/#setup-entry-point
+//
 
 import './global.css'; // global styles (incl. Tailwind CSS definitions).
 
 import { useEffect } from 'react';
 
+import { StatusBar } from 'expo-status-bar'; // control the status bar (the top bar of the screen that shows battery, time, etc.)
+
 import {
-  Slot, // renders the currently selected route (similar to `children` in React).
+  Slot, // dynamically renders the currently active screen in our app (similar to `children` in React).
   Stack,
   SplashScreen,
 } from 'expo-router';
@@ -42,6 +48,18 @@ const RootLayout = () => {
     return null;
   }
 
-  return <Stack screenOptions={{ headerShown: false }}></Stack>;
+  return (
+    <>
+      <StatusBar style='light' backgroundColor='#161622' />
+
+      <Stack screenOptions={{ headerShown: false, animation: 'none' }}>
+        <Stack.Screen name='index' />
+        <Stack.Screen name='(auth)' />
+        <Stack.Screen name='(tabs)' />
+        <Stack.Screen name='/search/[query]' />
+      </Stack>
+    </>
+  );
 };
+
 export default RootLayout;
