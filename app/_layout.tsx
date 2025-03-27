@@ -1,12 +1,22 @@
 // Root layout - share UI between multiple routes.
 // https://docs.expo.dev/develop/file-based-routing/#root-layout
+//
+// NOTE: This is the initial client file (entry point).
+// https://docs.expo.dev/router/installation/#setup-entry-point
+//
 
 import './global.css'; // global styles (incl. Tailwind CSS definitions).
 
 import { useEffect } from 'react';
 
+import { StatusBar } from 'expo-status-bar'; // control the status bar (the top bar of the screen that shows battery, time, etc.)
 import {
-  Slot, // renders the currently selected route (similar to `children` in React).
+  SafeAreaView, // render content within the safe area boundaries of a device.
+  // NOTE: Expo Router adds the <SafeAreaProvider> to every route; this setup is not needed (see: https://www.nativewind.dev/tailwind/new-concepts/safe-area-insets).
+} from 'react-native-safe-area-context';
+
+import {
+  Slot, // dynamically renders the currently active screen in our app (similar to `children` in React).
   Stack,
   SplashScreen,
 } from 'expo-router';
@@ -42,6 +52,28 @@ const RootLayout = () => {
     return null;
   }
 
-  return <Stack screenOptions={{ headerShown: false }}></Stack>;
+  return (
+    <>
+      <StatusBar
+        style='light'
+        backgroundColor='#161622'
+      />
+      <SafeAreaView style={{ flex: 1 }}>
+        <Stack
+          screenOptions={{
+            headerShown: false,
+            contentStyle: {
+              // style object for the scene content.
+              backgroundColor: '#161622', // apply a dark background color to the content area of all screens rendered within the stack.
+            },
+          }}>
+          <Stack.Screen name='index' />
+          <Stack.Screen name='(tabs)' />
+          <Stack.Screen name='(auth)' />
+        </Stack>
+      </SafeAreaView>
+    </>
+  );
 };
+
 export default RootLayout;
