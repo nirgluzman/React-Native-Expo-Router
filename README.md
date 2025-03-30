@@ -21,3 +21,6 @@ https://github.com/expo/expo/tree/main/templates/expo-template-tabs (code templa
 - File-based router for React Native and web applications.
 - **Note:** <br/>
   Expo Router adds the `<SafeAreaProvider>` to every route by default; see: https://www.nativewind.dev/tailwind/new-concepts/safe-area-insets.
+
+- **[Support for TypeScript](https://docs.expo.dev/router/reference/typed-routes/)**<br />
+  Code example: https://ignitecookbook.com/docs/recipes/ExpoRouter/
