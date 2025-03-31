@@ -2,8 +2,8 @@
 // Sign-up screen, providing a form for users to create a new account by entering their username, email, and password.
 //
 
-import { useState } from 'react';
-import { Image, View, ScrollView, Text, TouchableOpacity } from 'react-native';
+import { useState, useContext } from 'react';
+import { Alert, Image, View, ScrollView, Text, TouchableOpacity } from 'react-native';
 
 import {
   useSafeAreaInsets, // hook to get the safe area insets of the current device (instead of SafeAreaView).
@@ -11,6 +11,8 @@ import {
 } from 'react-native-safe-area-context';
 
 import { router } from 'expo-router';
+
+import { AuthContext } from '../../services/auth/auth.context';
 
 import { images } from '../../constants';
 import FormField from '../../components/FormField';
@@ -24,10 +26,23 @@ const SignUp = () => {
     email: '',
     password: '',
   });
-  const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
 
-  const submit = () => {
-    console.log('Form Submitted');
+  const { onSignUp, isLoading } = useContext(AuthContext);
+
+  const submit = async () => {
+    if (!form.username || !form.email || !form.password) {
+      Alert.alert('Error', 'Please fill in all the fields');
+      return;
+    }
+
+    const { success, message } = await onSignUp(form.username, form.email, form.password);
+
+    if (success) {
+      router.replace('/home');
+    } else {
+      Alert.alert('Error', message);
+      setForm({ username: '', email: '', password: '' });
+    }
   };
 
   return (
@@ -67,7 +82,7 @@ const SignUp = () => {
             otherStyles='mt-7'
             keyboardType='password'
           />
-          <CustomButton title='Sign up' containerStyles=' mt-7' handlePress={submit} isLoading={isSubmitting} />
+          <CustomButton title='Sign up' containerStyles=' mt-7' handlePress={submit} isLoading={isLoading} />
           <View className='flex flex-row justify-center pt-5 gap-2'>
             <Text className='text-lg text-gray-100 font-pregular'>Already have an account?</Text>
             <TouchableOpacity activeOpacity={0.7} onPress={() => router.replace('/sign-in')}>
