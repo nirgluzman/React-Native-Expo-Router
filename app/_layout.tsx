@@ -6,9 +6,9 @@
 //
 
 import './global.css'; // global styles (incl. Tailwind CSS definitions).
+import { colors } from '../constants/colors';
 
 import { useEffect } from 'react';
-
 import { StatusBar } from 'expo-status-bar'; // control the status bar (the top bar of the screen that shows battery, time, etc.)
 
 import {
@@ -19,6 +19,7 @@ import {
 
 import { useFonts } from 'expo-font';
 
+// prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
 
 const RootLayout = () => {
@@ -50,9 +51,16 @@ const RootLayout = () => {
 
   return (
     <>
-      <StatusBar style='light' backgroundColor='#161622' />
+      <StatusBar style='light' backgroundColor={colors.primary} />
 
-      <Stack screenOptions={{ headerShown: false, animation: 'none' }}>
+      <Stack
+        screenOptions={{
+          headerShown: false,
+          animation: 'none',
+          // for fixing white background flicker in Stack navigation transitions.
+          presentation: 'transparentModal',
+          contentStyle: { backgroundColor: colors.primary }, // style object for the scene content.
+        }}>
         <Stack.Screen name='index' />
         <Stack.Screen name='(auth)' />
         <Stack.Screen name='(tabs)' />
