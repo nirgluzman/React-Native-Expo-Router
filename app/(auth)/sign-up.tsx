@@ -6,7 +6,7 @@ import { useState } from 'react';
 import { Image, View, ScrollView, Text, TouchableOpacity } from 'react-native';
 
 import {
-  SafeAreaView, // render content within the safe area boundaries of a device.
+  useSafeAreaInsets, // hook to get the safe area insets of the current device (instead of SafeAreaView).
   // NOTE: Expo Router adds the <SafeAreaProvider> to every route; this setup is not needed (see: https://www.nativewind.dev/tailwind/new-concepts/safe-area-insets).
 } from 'react-native-safe-area-context';
 
@@ -17,6 +17,8 @@ import FormField from '../../components/FormField';
 import CustomButton from '../../components/CustomButton';
 
 const SignUp = () => {
+  const insets = useSafeAreaInsets();
+
   const [form, setForm] = useState({
     username: '',
     email: '',
@@ -29,7 +31,15 @@ const SignUp = () => {
   };
 
   return (
-    <SafeAreaView className='bg-primary h-full'>
+    <View
+      className='bg-primary h-full'
+      style={{
+        flex: 1,
+        paddingTop: insets.top,
+        paddingBottom: insets.bottom,
+        paddingLeft: insets.left,
+        paddingRight: insets.right,
+      }}>
       <ScrollView>
         <View className='w-full justify-start min-h-[85vh] px-6 my-20'>
           <Image source={images.logo} className='w-[115px] h-[35px]' resizeMode='contain' />
@@ -66,7 +76,8 @@ const SignUp = () => {
           </View>
         </View>
       </ScrollView>
-    </SafeAreaView>
+    </View>
   );
 };
+
 export default SignUp;

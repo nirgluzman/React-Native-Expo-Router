@@ -7,7 +7,7 @@
 import { router } from 'expo-router';
 
 import {
-  SafeAreaView, // render content within the safe area boundaries of a device.
+  useSafeAreaInsets, // hook to get the safe area insets of the current device (instead of SafeAreaView).
   // NOTE: Expo Router adds the <SafeAreaProvider> to every route; this setup is not needed (see: https://www.nativewind.dev/tailwind/new-concepts/safe-area-insets).
 } from 'react-native-safe-area-context';
 
@@ -17,8 +17,18 @@ import { images } from '../constants';
 import CustomButton from '../components/CustomButton';
 
 export default function Welcome() {
+  const insets = useSafeAreaInsets();
+
   return (
-    <SafeAreaView className='bg-primary h-full'>
+    <View
+      className='bg-primary h-full'
+      style={{
+        flex: 1,
+        paddingTop: insets.top,
+        paddingBottom: insets.bottom,
+        paddingLeft: insets.left,
+        paddingRight: insets.right,
+      }}>
       <ScrollView contentContainerStyle={{ height: '100%' }}>
         <View className='w-full justify-center items-center min-h-[85vh] px-4'>
           <Image source={images.logo} className='w-[130px] h-[84px]' resizeMode='contain' />
@@ -47,6 +57,6 @@ export default function Welcome() {
           />
         </View>
       </ScrollView>
-    </SafeAreaView>
+    </View>
   );
 }
