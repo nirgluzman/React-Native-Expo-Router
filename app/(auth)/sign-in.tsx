@@ -2,8 +2,8 @@
 // Sign-in screen, providing a form for users to enter their credentials.
 //
 
-import { useState } from 'react';
-import { Image, View, ScrollView, Text, TouchableOpacity } from 'react-native';
+import { useState, useContext } from 'react';
+import { Alert, Image, View, ScrollView, Text, TouchableOpacity } from 'react-native';
 
 import {
   useSafeAreaInsets, // hook to get the safe area insets of the current device (instead of SafeAreaView).
@@ -11,6 +11,8 @@ import {
 } from 'react-native-safe-area-context';
 
 import { router } from 'expo-router';
+
+import { AuthContext } from '../../services/auth/auth.context';
 
 import { images } from '../../constants';
 import FormField from '../../components/FormField';
@@ -23,10 +25,23 @@ const SignIn = () => {
     email: '',
     password: '',
   });
-  const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
 
-  const submit = () => {
-    console.log('Form Submitted');
+  const { onSignIn, isLoading } = useContext(AuthContext);
+
+  const submit = async () => {
+    if (!form.email || !form.password) {
+      Alert.alert('Error', 'Please fill in all the fields');
+      return;
+    }
+
+    const { success, message } = await onSignIn(form.email, form.password);
+
+    if (success) {
+      router.replace('/home');
+    } else {
+      Alert.alert('Error', message);
+      setForm({ email: '', password: '' });
+    }
   };
 
   return (
@@ -59,7 +74,7 @@ const SignIn = () => {
             otherStyles='mt-7'
             keyboardType='password'
           />
-          <CustomButton title='Sign in' containerStyles=' mt-7' handlePress={submit} isLoading={isSubmitting} />
+          <CustomButton title='Sign in' containerStyles=' mt-7' handlePress={submit} isLoading={isLoading} />
           <View className='flex flex-row justify-center pt-5 gap-2'>
             <Text className='text-lg text-gray-100 font-pregular'>Don't have an account?</Text>
             <TouchableOpacity activeOpacity={0.7} onPress={() => router.replace('/sign-up')}>
