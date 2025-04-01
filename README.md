@@ -44,6 +44,12 @@ https://stackoverflow.com/questions/69963519/how-to-make-a-transparent-modal-wit
     </Stack>
 ```
 
+## White Background Flash during Keyboard Transitions
+
+https://stackoverflow.com/questions/77686962/how-to-fix-that-white-flikering-behind-keyboard-in-react-native
+
+- Fixed with [expo-system-ui](https://docs.expo.dev/versions/latest/sdk/system-ui/) background color configuration.
+
 ## Support for Safe Areas
 
 https://docs.expo.dev/versions/latest/sdk/safe-area-context/ <br />
