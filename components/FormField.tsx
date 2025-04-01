@@ -6,6 +6,7 @@
 import { useState } from 'react';
 import { Image, Text, TextInput, View, TouchableOpacity } from 'react-native';
 
+import { colors } from '../constants';
 import { icons } from '../constants';
 
 interface IFormField {
@@ -33,7 +34,7 @@ const FormField = ({ title, placeholder, value, handleChangeText, otherStyles, .
           style={{ includeFontPadding: false }} // remove default font padding for vertical alignment of placeholder text.
           value={value}
           placeholder={placeholder}
-          placeholderTextColor='#7b7b8b'
+          placeholderTextColor={colors.gray[200]}
           onChangeText={handleChangeText}
           secureTextEntry={title === 'Password' && !showPassword}
           onFocus={() => setIsFocused(true)} // Callback that is called when the text input is focused.

@@ -5,6 +5,7 @@
 import { Image, View, Text, type ImageSourcePropType } from 'react-native';
 import { Tabs } from 'expo-router';
 
+import { colors } from '../../constants';
 import { icons } from '../../constants';
 
 interface ITabIcon {
@@ -35,14 +36,14 @@ const TabsLayout = () => {
           // https://stackoverflow.com/questions/63444247/react-native-top-tab-bar-navigator-indicator-width-to-match-text/75995819
           headerShown: false, // hide the header for all screens.
           tabBarShowLabel: false, // hide the tab label for all screens.
-          tabBarActiveTintColor: '#FFA001', // active tab color.
-          tabBarInactiveTintColor: '#CDCDE0', // inactive tab color.
+          tabBarActiveTintColor: colors.secondary.DEFAULT, // active tab color.
+          tabBarInactiveTintColor: colors.gray[100], // inactive tab color.
           tabBarStyle: {
             // style object for the tab bar
             height: 84,
-            backgroundColor: '#161622',
+            backgroundColor: colors.primary,
             borderTopWidth: 1, // top border of the tab bar.
-            borderTopColor: '#232533', // top border color of the tab bar.
+            borderTopColor: colors.black[200], // top border color of the tab bar.
           },
           tabBarIconStyle: {
             // style object for the tab icon.
