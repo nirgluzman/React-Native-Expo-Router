@@ -17,9 +17,14 @@ import {
   SplashScreen,
 } from 'expo-router';
 
+import * as SystemUI from 'expo-system-ui'; // library to interact with system UI elements.
+
 import { useFonts } from 'expo-font';
 
 import { AuthContextProvider } from '../services/auth/auth.context';
+
+// configure the root view background color - fix white background flash during keyboard transitions.
+SystemUI.setBackgroundColorAsync(colors.primary);
 
 // prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
