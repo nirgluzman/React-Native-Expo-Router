@@ -4,7 +4,9 @@
 // This route appears first when we open the app or navigate to our web app's root URL.
 //
 
-import { router } from 'expo-router';
+import { useContext } from 'react';
+
+import { router, Redirect } from 'expo-router';
 
 import {
   useSafeAreaInsets, // hook to get the safe area insets of the current device (instead of SafeAreaView).
@@ -13,11 +15,18 @@ import {
 
 import { Image, ScrollView, Text, View } from 'react-native';
 
+import { AuthContext } from '../services/auth/auth.context';
+
 import { images } from '../constants';
 import CustomButton from '../components/CustomButton';
 
 export default function Welcome() {
   const insets = useSafeAreaInsets();
+
+  const { isLoading, isAuthenticated } = useContext(AuthContext);
+
+  // authenticated users are automatically redirected to the /home screen.
+  if (!isLoading && isAuthenticated) return <Redirect href='/home' />;
 
   return (
     <View
