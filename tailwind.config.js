@@ -1,7 +1,7 @@
 // Tailwind CSS for React Native configuration.
 
-const { colors } = require('./constants/colors');
-const { fonts } = require('./constants/fonts');
+const colors = require('./constants/colors');
+const fonts = require('./constants/fonts');
 
 /** @type {import('tailwindcss').Config} */
 module.exports = {
