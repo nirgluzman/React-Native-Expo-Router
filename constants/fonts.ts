@@ -1,4 +1,4 @@
-export const fonts = {
+export default {
   pthin: ['Poppins-Thin', 'sans-serif'],
   pextralight: ['Poppins-ExtraLight', 'sans-serif'],
   plight: ['Poppins-Light', 'sans-serif'],
