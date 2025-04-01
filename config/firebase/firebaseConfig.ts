@@ -4,7 +4,9 @@
 import { initializeApp } from 'firebase/app';
 
 // import services, https://firebase.google.com/docs/web/setup#available-libraries
-import { getAuth } from 'firebase/auth';
+import { initializeAuth, getReactNativePersistence } from 'firebase/auth';
+
+import ReactNativeAsyncStorage from '@react-native-async-storage/async-storage';
 
 // app's Firebase configuration.
 const firebaseConfig = {
@@ -20,4 +22,11 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 
 // initialize Firebase Authentication and get a reference to the service.
-export const auth = getAuth(app);
+//
+// NOTE - persist auth state in AsyncStorage:
+// with `getAuth` we're initializing Firebase Auth for React Native without providing AsyncStorage.
+// Auth state will default to memory persistence and will not persist between sessions.
+//
+export const auth = initializeAuth(app, {
+  persistence: getReactNativePersistence(ReactNativeAsyncStorage),
+});
