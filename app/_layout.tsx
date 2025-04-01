@@ -6,7 +6,7 @@
 //
 
 import './global.css'; // global styles (incl. Tailwind CSS definitions).
-import { colors } from '../constants/colors';
+import { colors } from '../constants';
 
 import { useEffect } from 'react';
 import { StatusBar } from 'expo-status-bar'; // control the status bar (the top bar of the screen that shows battery, time, etc.)
