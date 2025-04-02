@@ -1,5 +1,3 @@
-import { useState, useContext, useCallback } from 'react';
-
 import { FlatList, Image, RefreshControl, Text, View } from 'react-native';
 
 import {
@@ -7,26 +5,24 @@ import {
   // NOTE: Expo Router adds the <SafeAreaProvider> to every route; this setup is not needed (see: https://www.nativewind.dev/tailwind/new-concepts/safe-area-insets).
 } from 'react-native-safe-area-context';
 
-import { AuthContext } from '../../services/auth/auth.context';
+import { useFirestore } from '../../services/db/useFirestore';
 
 import { images } from '../../constants';
 import SearchInput from '../../components/SearchInput';
 import Trending from '../../components/Trending';
 import EmptyState from '../../components/EmptyState';
+import VideoCard from '../../components/VideoCard';
 
 const Home = () => {
   const insets = useSafeAreaInsets();
 
-  const [refreshing, setRefreshing] = useState<boolean>(false);
-  const onRefresh = useCallback(() => {
-    // trigger fetch videos
-    setRefreshing(true);
-    setTimeout(() => {
-      setRefreshing(false);
-    }, 2000);
-  }, []);
+  // custom hook for real-time data listening and manual data refreshing from the Firestore collection.
+  const { videoItems, isPullToRefreshing, onPullToRefresh } = useFirestore();
 
-  const { user } = useContext(AuthContext);
+  //
+  // one FlatList with list header and horizontal FlatList.
+  // we cannot do that with just ScrollView as there's both horizontal and vertical scroll (two FlatLists, including Trending).
+  //
 
   return (
     <View
@@ -39,9 +35,9 @@ const Home = () => {
         paddingRight: insets.right,
       }}>
       <FlatList
-        data={[]}
+        data={videoItems}
         keyExtractor={(item) => item.id} // unique key for each FlatList item.
-        renderItem={({ item }) => <Text className='text-3xl text-white'>{item.id}</Text>}
+        renderItem={({ item }) => <VideoCard videoItem={item} />}
         ListHeaderComponent={() => (
           // rendered at the top of all the items.
           <View className='my-6 px-4 space-y-6'>
@@ -69,7 +65,7 @@ const Home = () => {
         )}
         refreshControl={
           // Pull down to see RefreshControl indicator, https://reactnative.dev/docs/refreshcontrol
-          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+          <RefreshControl refreshing={isPullToRefreshing} onRefresh={onPullToRefresh} />
         }
       />
     </View>
