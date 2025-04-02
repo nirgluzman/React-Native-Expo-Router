@@ -22,10 +22,22 @@ export const listenAuthState = (callback: (user: FirebaseUser | null) => void) =
   return onAuthStateChanged(auth, callback);
 };
 
+// function to generate an avatar URL with the initial letter.
+const generateAvatarUrl = (username: string): string => {
+  const initial = username.charAt(0).toUpperCase();
+  const backgroundColor = `#${Math.floor(Math.random() * 16777215).toString(16)}`; // random background color.
+  const textColor = '#FFFFFF'; // white text
+
+  return `https://ui-avatars.com/api/?name=${initial}&background=${backgroundColor.slice(1)}&color=${textColor.slice(
+    1
+  )}`;
+};
+
 // create a new user account with username, email and password.
 export const signUpRequest = async (username: string, email: string, password: string) => {
   const { user } = await createUserWithEmailAndPassword(auth, email, password);
-  await updateProfile(user, { displayName: username });
+  const avatarUrl = generateAvatarUrl(username);
+  await updateProfile(user, { displayName: username, photoURL: avatarUrl });
   return { user };
 };
 
