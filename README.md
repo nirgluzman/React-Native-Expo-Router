@@ -61,3 +61,92 @@ https://docs.expo.dev/versions/latest/sdk/safe-area-context/ <br />
   Jumpy animations during screen transitions can occur with the `SafeAreaView` component. <br/>
   It's recommended to use `useSafeAreaInsets` instead for consistent safe area handling. <br/>
   https://reactnavigation.org/docs/handling-safe-area/
+
+## Expo Video
+
+https://docs.expo.dev/versions/latest/sdk/video/#videoplayerevents <br/>
+https://expo.dev/blog/expo-video-a-simple-powerful-way-to-play-videos-in-apps <br/>
+https://stackoverflow.com/questions/79552148/
+
+- `expo-video` is a cross-platform, performant video component for React Native and Expo with Web support.
+- It is replacing the Video component of `expo-av`.
+
+- **NOTE:** <br/>
+  [Rendering multiple `VideoView` components in the same `VideoPlayer`](https://stackoverflow.com/questions/79552148/)<br />
+  Mounting multiple `VideoView` components at the same time in the same `VideoPlayer` component does not work on **Android** due to a [platform limitation](https://github.com/expo/expo/issues/35012).
+
+## Expo AV
+
+https://docs.expo.dev/versions/latest/sdk/video-av/ <br/>
+
+- Library that provides APIs for Audio and Video playback.
+
+- **NOTE:** <br/>
+  The `Video` component from `expo-av` will be replaced by an improved version in `expo-video` in the upcoming Expo SDK release.
+
+- **Note:** <br/>
+  [Expo-AV does not recognize NativeWind className prop](https://stackoverflow.com/questions/79551685/does-expo-av-support-classname-prop)
+
+```ts
+<View className='w-full h-60 overflow-hidden rounded-xl mt-3'>
+  <Video
+    source={{
+      uri: (videoSource = 'http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4'), // VIDEO PLACEHOLDER
+    }}
+    style={{
+      // style the video to fill its parent
+      width: '100%',
+      height: '100%',
+    }}
+    resizeMode={ResizeMode.COVER}
+    useNativeControls={true}
+    shouldPlay
+    onError={
+      // function to be called if load or playback have encountered a fatal error.
+      (error) => {
+        Alert.alert('Error', error);
+        setPlay(false);
+      }
+    }
+    onPlaybackStatusUpdate={
+      // function to be called regularly with the AVPlaybackStatus of the video.
+      (status) => {
+        // https://docs.expo.dev/versions/latest/sdk/av/#avplaybackstatussuccess
+        if (status.isLoaded && (status as AVPlaybackStatusSuccess).didJustFinish) {
+          setPlay(false);
+        }
+      }
+    }
+  />
+</View>
+```
+
+## Expo Hooks
+
+https://docs.expo.dev/versions/latest/sdk/expo/#hooks <br/>
+https://docs.expo.dev/versions/latest/sdk/video/#receiving-events
+
+- Examples:
+
+```ts
+  // React hook that listens to events emitted by the given object - allows us to listen to events emitted by the player.
+  // The returned value is an event parameter that gets updated whenever a new event is dispatched.
+  const { isPlaying } = useEvent(
+    videoPlayer, // the object that emits events.
+    'playingChange', // name of the event to listen to; https://docs.expo.dev/versions/latest/sdk/video/#videoplayerevents
+    { isPlaying: videoPlayer.playing } // initial state (an event parameter to use until the event is called for the first time).
+  );
+```
+```ts
+  // React hook that listens to events emitted by the given object and calls the listener function whenever a new event is dispatched.
+  useEventListener(
+    videoPlayer, // the object that emits events.
+    'statusChange', // name of the event to listen to;
+    ({ status, error }) => {
+      // function to call when the event is dispatched.
+      if (status === 'error') {
+        Alert.alert('Error', error!.message);
+      }
+    }
+  );
+```
