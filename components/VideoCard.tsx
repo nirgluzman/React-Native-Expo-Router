@@ -4,11 +4,10 @@
 // This component displays a video metadata (including creator information, video title, thumbnail) and a video player.
 //
 
-import { useState } from 'react';
-
 import { Alert, Image, View, Text, TouchableOpacity } from 'react-native';
 
-import { Video, ResizeMode, AVPlaybackStatusSuccess } from 'expo-av';
+import { useEvent, useEventListener } from 'expo';
+import { useVideoPlayer, VideoView, VideoPlayer } from 'expo-video';
 
 import { type Video as VideoDocument } from '../types/video';
 import { icons } from '../constants';
@@ -22,10 +21,36 @@ const VideoCard = ({
     creator: { username, photoURL },
     title,
     thumbnail,
-    video: videoSource,
+    video: videoUrl,
   },
 }: IVideoCard) => {
-  const [play, setPlay] = useState<boolean>(false);
+  // hook for managing the lifecycle of the player, and destroying it when the screen is unmounted.
+  const videoPlayer = useVideoPlayer(
+    (videoUrl = 'http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4'), // VIDEO URL PLACEHOLDER
+    (player: VideoPlayer) => {
+      player.loop = false; // determines whether the player should automatically replay after reaching the end of the video.
+    }
+  );
+
+  // hook for listening to events emitted by the video player.
+  // the returned value is an event parameter that gets updated whenever a new event is dispatched.
+  const { isPlaying } = useEvent(
+    videoPlayer, // the object that emits events.
+    'playingChange', // name of the event to listen to; https://docs.expo.dev/versions/latest/sdk/video/#videoplayerevents
+    { isPlaying: videoPlayer.playing } // initial state (an event parameter to use until the event is called for the first time).
+  );
+
+  //hook for listening to events emitted by the given object and calls the listener function whenever a new event is dispatched.
+  useEventListener(
+    videoPlayer, // the object that emits events.
+    'statusChange', // name of the event to listen to;
+    ({ status, error }) => {
+      // function to call when the event is dispatched.
+      if (status === 'error') {
+        Alert.alert('Error', error!.message);
+      }
+    }
+  );
 
   return (
     <View className='flex-col items-center px-4 mb-14'>
@@ -50,45 +75,27 @@ const VideoCard = ({
         </View>
       </View>
 
-      {play ? (
+      {isPlaying ? (
         <View className='w-full h-60 overflow-hidden rounded-xl mt-3'>
-          <Video
-            source={{
-              uri: (videoSource =
-                'http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4'), // VIDEO PLACE HOLDER
-            }}
+          <VideoView
+            player={videoPlayer}
+            allowsFullscreen={false}
+            allowsPictureInPicture={false}
+            nativeControls={true} // determine whether native controls should be displayed or not.
+            contentFit='cover' // describe how the video should be scaled to fit in the container.
             style={{
               // style the video to fill its parent
               width: '100%',
               height: '100%',
             }}
-            resizeMode={ResizeMode.COVER}
-            useNativeControls={true}
-            shouldPlay
-            onError={
-              // function to be called if load or playback have encountered a fatal error.
-              (error) => {
-                Alert.alert('Error', error);
-                setPlay(false);
-              }
-            }
-            onPlaybackStatusUpdate={
-              // function to be called regularly with the AVPlaybackStatus of the video.
-              (status) => {
-                // https://docs.expo.dev/versions/latest/sdk/av/#avplaybackstatussuccess
-                if (status.isLoaded && (status as AVPlaybackStatusSuccess).didJustFinish) {
-                  setPlay(false);
-                }
-              }
-            }
           />
         </View>
       ) : (
         <TouchableOpacity
           activeOpacity={0.7}
-          onPress={() => setPlay(true)}
+          onPress={() => videoPlayer.play()}
           className='w-full h-60 rounded-xl relative justify-center items-center mt-3'>
-          <Image source={{ uri: thumbnail }} className='w-full h-full rounded-xl mt-3' resizeMode='cover' />
+          <Image source={{ uri: thumbnail }} className='w-full h-full rounded-xl' resizeMode='cover' />
           <Image source={icons.play} className='w-12 h-12 absolute' resizeMode='contain' />
         </TouchableOpacity>
       )}
