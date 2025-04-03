@@ -12,15 +12,18 @@ import {
   onSnapshot, // realtime updates.
   getDoc, // get a single document from the database.
   getDocs, // get multiple documents from the database.
+  query, // create a new immutable instance of Query that is extended to also include additional query constraints.
+  orderBy, // specify the sort order for data retrieved.
+  limit, // limit the number of documents retrieved.
   addDoc, // add a new document to a collection.
   setDoc, // create or overwrite a single document.
   updateDoc, // update specific fields of a document without overwriting the entire document.
   deleteDoc, // delete a single document from the database.
   DocumentReference, // document location in a Firestore database.
-  DocumentData, // mapping between a field and its value.
+  DocumentData,
 } from 'firebase/firestore';
 
-import { FirebaseError } from '@firebase/util'; // subclass of the standard JavaScript Error object. In addition to a message string and stack trace, it contains a string code.
+import { FirebaseError } from '@firebase/util'; // subclass of the standard JavaScript Error object (in addition to a message string and stack trace, it contains a string code).
 
 // create a document reference.
 export const createDocumentReference = <T extends DocumentData>(
@@ -35,15 +38,21 @@ export const createDocumentReference = <T extends DocumentData>(
   return doc(db, collectionName) as DocumentReference<T>;
 };
 
-// listen to changes in all documents in a collection.
+// listen to changes in documents in the collection; snapshot is ordered by timestamp (descending), limited to a queryLimit.
 export const listenToCollection = <T extends DocumentData>(
   collectionName: string,
+  queryLimit: number = 0,
   callback: (data: (T & { id: string })[]) => void,
   errorCallback?: (error: FirebaseError) => void
 ): (() => void) => {
   const collectionRef = collection(db, collectionName);
+  const documentsQuery =
+    queryLimit > 0
+      ? query(collectionRef, orderBy('timestamp', 'desc'), limit(queryLimit))
+      : query(collectionRef, orderBy('timestamp', 'desc'));
+
   return onSnapshot(
-    collectionRef,
+    documentsQuery,
     { includeMetadataChanges: false },
     (querySnapshot) => {
       const data: (T & { id: string })[] = [];
@@ -60,6 +69,7 @@ export const listenToCollection = <T extends DocumentData>(
     },
     (err) => {
       // handle Firestore listener errors; these errors occur asynchronously during the onSnapshot listener's operation.
+      // https://firebase.google.com/docs/firestore/query-data/listen#handle_listen_errors
       if (errorCallback) {
         errorCallback(err);
       } else {
@@ -69,7 +79,7 @@ export const listenToCollection = <T extends DocumentData>(
   );
 };
 
-// get a single document from the database.
+// fetch a single document from the database.
 // by default, a get call will attempt to fetch the latest document snapshot from our database.
 // on platforms with offline support, the client library will use the offline cache if the network is unavailable or if the request times out.
 export const getDocument = async <T extends DocumentData>(
@@ -78,14 +88,23 @@ export const getDocument = async <T extends DocumentData>(
 ): Promise<T | undefined> => {
   const docRef = createDocumentReference<T>(collectionName, documentId); // create a reference to the document with documentId.
   const docSnap = await getDoc(docRef); // get the document from the database.
+
   return docSnap.exists() ? docSnap.data() : undefined;
 };
 
-// get all documents from a collection.
-export const getAllDocuments = async <T extends DocumentData>(
-  collectionName: string
+// fetch multiple documents from a collection, ordered by timestamp (descending), limited to a queryLimit.
+// https://firebase.google.com/docs/firestore/query-data/order-limit-data
+export const getDocuments = async <T extends DocumentData>(
+  collectionName: string,
+  queryLimit: number = 0
 ): Promise<(T & { id: string })[]> => {
-  const querySnapshot = await getDocs(collection(db, collectionName));
+  const collectionRef = collection(db, collectionName);
+  const documentsQuery =
+    queryLimit > 0
+      ? query(collectionRef, orderBy('timestamp', 'desc'), limit(queryLimit))
+      : query(collectionRef, orderBy('timestamp', 'desc'));
+  const querySnapshot = await getDocs(documentsQuery);
+
   return querySnapshot.docs.map((doc) => ({
     ...(doc.data() as T), // get the document's data fields
     id: doc.id, // add the document's identifier
@@ -99,6 +118,7 @@ export const createDocument = async <T extends DocumentData>(
 ): Promise<DocumentReference<T>> => {
   const collectionRef = collection(db, collectionName);
   const docRef = await addDoc(collectionRef, data); // creates a new document with an auto-generated document identifier.
+
   return docRef as DocumentReference<T>; // return the reference to where the document is stored.
 };
 
@@ -122,6 +142,7 @@ export const updateDocumentFields = async <T extends DocumentData>(
   data: T
 ): Promise<void> => {
   const docRef = createDocumentReference<T>(collectionName, documentId); // create a reference to the document with documentId.
+
   return await updateDoc(docRef, data);
 };
 
@@ -131,5 +152,6 @@ export const deleteDocument = async <T extends DocumentData>(
   documentId: string
 ): Promise<void> => {
   const docRef = createDocumentReference<T>(collectionName, documentId); // create a reference to the document with documentId.
+
   return await deleteDoc(docRef); // delete the document.
 };
