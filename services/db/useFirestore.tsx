@@ -1,67 +1,61 @@
 //
 // useFirestore Custom Hook
 //
-// Hook to provide an interface for fetching and managing video data from a Firestore collection.
-// It encapsulates real-time data listening, manual data refreshing, loading state management, and error handling.
+// Hook to provide an interface for fetching and managing data from a Firestore collection.
+// It encapsulates real-time updates, data fetching, loading state management, and error handling.
 //
 
 import { useState, useEffect, useCallback } from 'react';
 import { Alert } from 'react-native';
 
 import { FirebaseError } from '@firebase/util'; // subclass of the standard JavaScript Error object. In addition to a message string and stack trace, it contains a string code.
+import { DocumentData } from 'firebase/firestore';
 
-import { type Video } from '../../types/video';
-import { listenToCollection, getAllDocuments } from '../../services/db/db.service';
+import { listenToCollection, getDocuments } from '../../services/db/db.service';
 
-const collectionName = process.env.EXPO_PUBLIC_FIRESTORE_COLLECTION || '';
-
-export const useFirestore = () => {
-  // State object managing video data fetched from Firestore.
-  // Encapsulates video items, loading, and refresh states into a single object to reduce multiple state updates to improve performance.
+export const useFirestore = <T extends DocumentData>(collectionName: string, queryLimit: number = 0) => {
   const [firestoreData, setFirestoreData] = useState({
-    videoItems: [] as (Video & { id: string })[], // array of Video items fetched from Firestore, including their document IDs.
-    isListening: true, // indicates whether the Firestore listener is actively receiving updates.
-    isPullToRefreshing: false, // indicates whether a pull-to-refresh operation is in progress.
+    data: [] as (T & { id: string })[], // array of data items fetched from Firestore, including their document IDs.
+    isListening: false, // indicates whether the Firestore real-time listener is active.
+    isFetching: false, // indicates whether a fetch operation is in progress (manually triggered, not from the real-time listener).
   });
 
   const handleFetchError = useCallback((err: Error) => {
     Alert.alert('Error', err instanceof FirebaseError ? err.message : 'An unexpected error occurred.');
   }, []);
 
-  const handlePullToRefresh = useCallback(async () => {
-    setFirestoreData((prev) => ({ ...prev, isPullToRefreshing: true }));
+  const handleFetch = useCallback(async () => {
+    setFirestoreData((prev) => ({ ...prev, isFetching: true }));
 
     try {
-      // fetch the latest video data from Firestore using getAllDocuments; this forces a server fetch, bypassing the local cache, to ensure up-to-date data.
-      const refreshedVideos = await getAllDocuments<Video>(collectionName);
+      // fetch data from Firestore; this forces a server fetch, bypassing the local cache, to ensure up-to-date data.
+      const fetchedData = await getDocuments<T>(collectionName, queryLimit);
 
-      // update the 'videoItems' state with the newly fetched data, triggering a re-render.
+      // update the 'data' state with the newly fetched data.
       setFirestoreData((prev) => ({
         ...prev,
-        videoItems: refreshedVideos,
-        isPullToRefreshing: false,
+        data: fetchedData,
+        isFetching: false,
       }));
     } catch (err) {
       handleFetchError(err as Error);
 
-      // reset the refreshing state to false, indicating the refresh is complete (regardless of success or failure).
-      setFirestoreData((prev) => ({ ...prev, isPullToRefreshing: false }));
+      // reset the fetching state to false, indicating the fetch is complete (regardless of success or failure).
+      setFirestoreData((prev) => ({ ...prev, isFetching: false }));
     }
   }, []); // empty dependency array since we're using functional updates.
 
-  // set up a real-time listener for the "videos" collection in Firestore.
+  // set up a real-time listener for the collection in Firestore.
   useEffect(() => {
-    // set isListening to `true` when starting to fetch from Firestore.
-    setFirestoreData((prev) => ({ ...prev, isListening: true }));
-
     try {
-      const unsubscribeFromFirestore = listenToCollection<Video>(
+      const unsubscribeFromFirestore = listenToCollection<T>(
         collectionName,
-        (videos) => {
+        queryLimit,
+        (items) => {
           setFirestoreData((prev) => ({
             ...prev,
-            videoItems: videos,
-            isListening: false, // set isListening to `false` once data is received.
+            data: items,
+            isListening: true, // real-time listener is active.
           }));
         },
         (err) => {
@@ -74,6 +68,7 @@ export const useFirestore = () => {
       );
       return () => {
         unsubscribeFromFirestore();
+        setFirestoreData((prev) => ({ ...prev, isListening: false })); // unmount
       };
     } catch (err) {
       // Handle synchronous errors during the initial setup of the Firestore listener.
@@ -86,9 +81,9 @@ export const useFirestore = () => {
   }, []); // empty dependency array since this should only run once on mount
 
   return {
-    videoItems: firestoreData.videoItems,
+    data: firestoreData.data,
     isListening: firestoreData.isListening,
-    isPullToRefreshing: firestoreData.isPullToRefreshing,
-    onPullToRefresh: handlePullToRefresh,
+    isFetching: firestoreData.isFetching,
+    onFetch: handleFetch,
   };
 };
