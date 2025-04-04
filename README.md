@@ -150,3 +150,9 @@ https://docs.expo.dev/versions/latest/sdk/video/#receiving-events
     }
   );
 ```
+## Animations in React Native
+
+https://www.npmjs.com/package/react-native-animatable/ <br/>
+https://www.scaler.com/topics/react-native-animatable/
+
+- Library to create smooth, declarative animations in React Native applications.
