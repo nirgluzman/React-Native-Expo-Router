@@ -1,3 +1,10 @@
+//
+// Home tab
+//
+// This component displays a list of videos along with trending videos and a search input.
+// It fetches video data from Firestore and provides an interface for browsing and discovering video content.
+//
+
 import { FlatList, Image, RefreshControl, Text, View } from 'react-native';
 
 import {
@@ -7,17 +14,22 @@ import {
 
 import { useFirestore } from '../../services/db/useFirestore';
 
+import { type VideoWithId } from '../../types/video';
+
 import { images } from '../../constants';
 import SearchInput from '../../components/SearchInput';
 import Trending from '../../components/Trending';
 import EmptyState from '../../components/EmptyState';
 import VideoCard from '../../components/VideoCard';
 
+const collectionName = process.env.EXPO_PUBLIC_FIRESTORE_COLLECTION || '';
+
 const Home = () => {
   const insets = useSafeAreaInsets();
 
-  // custom hook for real-time data listening and manual data refreshing from the Firestore collection.
-  const { videoItems, isPullToRefreshing, onPullToRefresh } = useFirestore();
+  // custom hook for real-time data listening and data fetching from Frirestor.
+  const { data: videoItems, isFetching: isPullToRefreshing, onFetch: onPullToRefresh } = useFirestore(collectionName);
+  const { data: trendingItems } = useFirestore(collectionName, 3); // contain the 3 most recently added videos (hard coded value); to be replaced with a dynamic configuration later !
 
   //
   // one FlatList with list header and horizontal FlatList.
@@ -35,7 +47,7 @@ const Home = () => {
         paddingRight: insets.right,
       }}>
       <FlatList
-        data={videoItems}
+        data={videoItems as VideoWithId[]}
         keyExtractor={(item) => item.id} // unique key for each FlatList item.
         renderItem={({ item }) => <VideoCard videoItem={item} />}
         ListHeaderComponent={() => (
@@ -55,7 +67,7 @@ const Home = () => {
 
             <View className='flex-1 w-full pt-5 pb-8'>
               <Text className='font-pregular text-lg text-gray-100 mb-3'>Trending Videos</Text>
-              <Trending posts={[{ id: 11 }, { id: 22 }, { id: 33 }]} />
+              <Trending trendingVideos={trendingItems as VideoWithId[]} />
             </View>
           </View>
         )}
@@ -64,7 +76,7 @@ const Home = () => {
           <EmptyState title='No Videos Found' subtitle='Be the first one to upload videos' />
         )}
         refreshControl={
-          // Pull down to see RefreshControl indicator, https://reactnative.dev/docs/refreshcontrol
+          // pull down to see RefreshControl indicator, https://reactnative.dev/docs/refreshcontrol
           <RefreshControl refreshing={isPullToRefreshing} onRefresh={onPullToRefresh} />
         }
       />
