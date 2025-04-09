@@ -12,6 +12,7 @@ import {
 
 import { router } from 'expo-router';
 
+import { useErrorContext } from '../../services/error/error.context';
 import { AuthContext } from '../../services/auth/auth.context';
 
 import { images } from '../../constants';
@@ -27,20 +28,20 @@ const SignUp = () => {
     password: '',
   });
 
+  const { handleError } = useErrorContext(); // obtain the function responsible for updating the global error state.
   const { onSignUp, isLoading } = useContext(AuthContext);
 
   const submit = async () => {
     if (!form.username || !form.email || !form.password) {
-      Alert.alert('Error', 'Please fill in all the fields');
+      handleError(new Error('Missing fields'), { userMessage: 'Please fill in all the fields.' });
       return;
     }
 
-    const { success, message } = await onSignUp(form.username, form.email, form.password);
+    const { success } = await onSignUp(form.username, form.email, form.password);
 
     if (success) {
       router.replace('/home');
     } else {
-      Alert.alert('Error', message);
       setForm({ username: '', email: '', password: '' });
     }
   };

@@ -3,7 +3,7 @@
 //
 
 import { useState, useContext } from 'react';
-import { Alert, Image, View, ScrollView, Text, TouchableOpacity } from 'react-native';
+import { Image, View, ScrollView, Text, TouchableOpacity } from 'react-native';
 
 import {
   useSafeAreaInsets, // hook to get the safe area insets of the current device (instead of SafeAreaView).
@@ -12,6 +12,7 @@ import {
 
 import { router } from 'expo-router';
 
+import { useErrorContext } from '../../services/error/error.context'; // custom hook for accessing the global error management context.
 import { AuthContext } from '../../services/auth/auth.context';
 
 import { images } from '../../constants';
@@ -26,20 +27,20 @@ const SignIn = () => {
     password: '',
   });
 
+  const { handleError } = useErrorContext(); // obtain the function responsible for updating the global error state.
   const { onSignIn, isLoading } = useContext(AuthContext);
 
   const submit = async () => {
     if (!form.email || !form.password) {
-      Alert.alert('Error', 'Please fill in all the fields');
+      handleError(new Error('Missing fields'), { userMessage: 'Please fill in all the fields.' });
       return;
     }
 
-    const { success, message } = await onSignIn(form.email, form.password);
+    const { success } = await onSignIn(form.email, form.password);
 
     if (success) {
       router.replace('/home');
     } else {
-      Alert.alert('Error', message);
       setForm({ email: '', password: '' });
     }
   };
