@@ -21,7 +21,14 @@ import * as SystemUI from 'expo-system-ui'; // library to interact with system U
 
 import { useFonts } from 'expo-font';
 
+const collectionName = process.env.EXPO_PUBLIC_FIRESTORE_COLLECTION || '';
+import { type Video } from '../types/video';
+
+import { ErrorContextProvider } from '../services/error/error.context';
 import { AuthContextProvider } from '../services/auth/auth.context';
+import { FirestoreContextProvider } from '../services/db/firestore.context';
+
+import ErrorAlert from '../components/ErrorAlert';
 
 // configure the root view background color - fix white background flash during keyboard transitions.
 SystemUI.setBackgroundColorAsync(colors.primary);
@@ -60,21 +67,26 @@ const RootLayout = () => {
     <>
       <StatusBar style='light' backgroundColor={colors.primary} />
 
-      <AuthContextProvider>
-        <Stack
-          screenOptions={{
-            headerShown: false,
-            animation: 'none',
-            // for fixing white background flicker in Stack navigation transitions.
-            presentation: 'transparentModal',
-            contentStyle: { backgroundColor: colors.primary }, // style object for the scene content.
-          }}>
-          <Stack.Screen name='index' />
-          <Stack.Screen name='(auth)' />
-          <Stack.Screen name='(tabs)' />
-          <Stack.Screen name='/search/[query]' />
-        </Stack>
-      </AuthContextProvider>
+      <ErrorContextProvider>
+        <ErrorAlert />
+        <AuthContextProvider>
+          <FirestoreContextProvider<Video> collectionName={collectionName}>
+            <Stack
+              screenOptions={{
+                headerShown: false,
+                animation: 'none',
+                // for fixing white background flicker in Stack navigation transitions.
+                presentation: 'transparentModal',
+                contentStyle: { backgroundColor: colors.primary }, // style object for the scene content.
+              }}>
+              <Stack.Screen name='index' />
+              <Stack.Screen name='(auth)' />
+              <Stack.Screen name='(tabs)' />
+              <Stack.Screen name='search/[query]' />
+            </Stack>
+          </FirestoreContextProvider>
+        </AuthContextProvider>
+      </ErrorContextProvider>
     </>
   );
 };
