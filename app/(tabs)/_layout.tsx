@@ -2,11 +2,16 @@
 // This component defines the bottom tab navigation structure for the application using Expo Router's Tabs navigator.
 //
 
+import { useEffect } from 'react';
+
 import { Image, View, Text, type ImageSourcePropType } from 'react-native';
 import { Tabs } from 'expo-router';
 
+import { type Video } from '../../types/video';
 import { colors } from '../../constants';
 import { icons } from '../../constants';
+
+import { useFirestoreContext } from '../../services/db/firestore.context';
 
 interface ITabIcon {
   icon: ImageSourcePropType;
@@ -28,6 +33,19 @@ const TabIcon = ({ icon, color, name, focused }: ITabIcon) => {
 };
 
 const TabsLayout = () => {
+  const { startListener, stopListener } = useFirestoreContext<Video>();
+
+  useEffect(() => {
+    // start the real-time listener on mount.
+    // NOTE: 'orderByField' and 'limit' are hardcoded for development purposes; to be replaced with a dynamic configuration later!
+    const options = { orderByField: 'timestamp', forceServerFetch: true, limit: 10 };
+    startListener(options);
+
+    return () => {
+      stopListener(); // stop the listener when the component unmounts (cleanup).
+    };
+  }, []);
+
   return (
     <>
       <Tabs
