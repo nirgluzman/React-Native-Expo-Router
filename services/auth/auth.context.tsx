@@ -2,7 +2,7 @@
 // Authentication context for managing authentication state and logic for the application.
 //
 
-import { useState, useEffect, createContext, type ReactNode } from 'react';
+import { useState, useEffect, createContext, useContext, type ReactNode } from 'react';
 
 import { type User as FirebaseUser } from 'firebase/auth';
 import { FirebaseError } from '@firebase/util'; // subclass of the standard JavaScript Error object. In addition to a message string and stack trace, it contains a string code.
@@ -23,24 +23,9 @@ type AuthContextType = {
   isLoading: boolean; // tracking authentication state changes.
 };
 
-// create context with proper typing and default values.
-export const AuthContext = createContext<AuthContextType>({
-  user: null,
-  isAuthenticated: false,
-  onSignIn: async () => {
-    // using throw new Error(...) within the default values of a createContext object serves as a safeguard
-    // against using context functions without their required Provider higher in the component tree.
-    throw new Error('Cannot use onSignIn without AuthContextProvider');
-  },
-  onSignUp: async () => {
-    throw new Error('Cannot use onSignUp without AuthContextProvider');
-  },
-  onLogout: async () => {
-    throw new Error('Cannot use onLogout without AuthContextProvider');
-  },
-  idToken: null,
-  isLoading: false,
-});
+// create the context.
+// using 'undefined' enforces provider usage and prevents accidental context access without it.
+const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthContextProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<FirebaseUser | null>(null);
@@ -116,18 +101,28 @@ export const AuthContextProvider = ({ children }: { children: ReactNode }) => {
     // Therefore, the dependency array should be empty.
   }, []);
 
-  return (
-    <AuthContext.Provider
-      value={{
-        user,
-        isAuthenticated,
-        onSignIn,
-        onSignUp,
-        onLogout,
-        idToken,
-        isLoading,
-      }}>
-      {children}
-    </AuthContext.Provider>
-  );
+  // context value.
+  const contextValue: AuthContextType = {
+    user,
+    isAuthenticated,
+    onSignIn,
+    onSignUp,
+    onLogout,
+    idToken,
+    isLoading,
+  };
+
+  return <AuthContext.Provider value={contextValue}>{children}</AuthContext.Provider>;
+};
+
+// custom hook for using Auth context.
+export const useAuthContext = () => {
+  const context = useContext(AuthContext);
+
+  // check if the context is available.
+  if (context === undefined) {
+    throw new Error('useAuthContext must be used within a AuthContextProvider');
+  }
+
+  return context as AuthContextType;
 };
