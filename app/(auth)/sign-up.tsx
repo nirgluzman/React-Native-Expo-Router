@@ -2,8 +2,8 @@
 // Sign-up screen, providing a form for users to create a new account by entering their username, email, and password.
 //
 
-import { useState, useContext } from 'react';
-import { Alert, Image, View, ScrollView, Text, TouchableOpacity } from 'react-native';
+import { useState } from 'react';
+import { Image, View, ScrollView, Text, TouchableOpacity } from 'react-native';
 
 import {
   useSafeAreaInsets, // hook to get the safe area insets of the current device (instead of SafeAreaView).
@@ -13,7 +13,7 @@ import {
 import { router } from 'expo-router';
 
 import { useErrorContext } from '../../services/error/error.context';
-import { AuthContext } from '../../services/auth/auth.context';
+import { useAuthContext } from '../../services/auth/auth.context';
 
 import { images } from '../../constants';
 import FormField from '../../components/FormField';
@@ -29,7 +29,7 @@ const SignUp = () => {
   });
 
   const { handleError } = useErrorContext(); // obtain the function responsible for updating the global error state.
-  const { onSignUp, isLoading } = useContext(AuthContext);
+  const { onSignUp, isLoading } = useAuthContext();
 
   const submit = async () => {
     if (!form.username || !form.email || !form.password) {

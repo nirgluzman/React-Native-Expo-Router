@@ -2,7 +2,7 @@
 // Sign-in screen, providing a form for users to enter their credentials.
 //
 
-import { useState, useContext } from 'react';
+import { useState } from 'react';
 import { Image, View, ScrollView, Text, TouchableOpacity } from 'react-native';
 
 import {
@@ -13,7 +13,7 @@ import {
 import { router } from 'expo-router';
 
 import { useErrorContext } from '../../services/error/error.context'; // custom hook for accessing the global error management context.
-import { AuthContext } from '../../services/auth/auth.context';
+import { useAuthContext } from '../../services/auth/auth.context';
 
 import { images } from '../../constants';
 import FormField from '../../components/FormField';
@@ -28,7 +28,7 @@ const SignIn = () => {
   });
 
   const { handleError } = useErrorContext(); // obtain the function responsible for updating the global error state.
-  const { onSignIn, isLoading } = useContext(AuthContext);
+  const { onSignIn, isLoading } = useAuthContext();
 
   const submit = async () => {
     if (!form.email || !form.password) {

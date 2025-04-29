@@ -4,8 +4,6 @@
 // This route appears first when we open the app or navigate to our web app's root URL.
 //
 
-import { useContext } from 'react';
-
 import { router, Redirect } from 'expo-router';
 
 import {
@@ -15,7 +13,7 @@ import {
 
 import { Image, ScrollView, Text, View } from 'react-native';
 
-import { AuthContext } from '../services/auth/auth.context';
+import { useAuthContext } from '../services/auth/auth.context';
 
 import { images } from '../constants';
 import CustomButton from '../components/CustomButton';
@@ -23,7 +21,7 @@ import CustomButton from '../components/CustomButton';
 export default function Welcome() {
   const insets = useSafeAreaInsets();
 
-  const { isLoading, isAuthenticated } = useContext(AuthContext);
+  const { isLoading, isAuthenticated } = useAuthContext();
 
   // authenticated users are automatically redirected to the /home screen.
   if (!isLoading && isAuthenticated) return <Redirect href='/home' />;

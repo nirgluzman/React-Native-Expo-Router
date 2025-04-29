@@ -2,7 +2,7 @@
 // Profile Tab
 //
 
-import { useState, useEffect, useContext } from 'react';
+import { useState, useEffect } from 'react';
 import { FlatList, Image, TouchableOpacity, View } from 'react-native';
 
 import { router } from 'expo-router';
@@ -17,7 +17,7 @@ import { WhereFilterOp, OrderByDirection } from 'firebase/firestore';
 import type { Video, VideoWithId } from '../../types/video';
 import { icons } from '../../constants';
 
-import { AuthContext } from '../../services/auth/auth.context';
+import { useAuthContext } from '../../services/auth/auth.context';
 import { useFirestoreContext } from '../../services/db/firestore.context';
 
 import EmptyState from '../../components/EmptyState';
@@ -29,7 +29,7 @@ const Profile = () => {
 
   const [userItems, setUserItems] = useState<VideoWithId[]>([]);
 
-  const { user, onLogout } = useContext(AuthContext);
+  const { user, onLogout } = useAuthContext();
 
   const { getFilteredAndOrderedDocuments: onPullToRefresh } = useFirestoreContext<Video>();
 
