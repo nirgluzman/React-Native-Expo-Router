@@ -52,9 +52,11 @@ const SearchInput = ({ placeholder, initialQuery, ...props }: ISearchInput) => {
     <View
       className={`w-full h-16 px-4 bg-black-100 rounded-lg border-2 mt-1 ${
         isFocused ? 'border-secondary' : 'border-black-200'
-      } flex flex-row items-center space-x-4`}>
+      } flex flex-row items-center gap-x-4`}>
+      {/* space-{n} was temporary removed in NativeWind v4, see: https://www.nativewind.dev/tailwind/spacing/space-between */}
+
       <TextInput
-        className='flex-1 text-gray-100 font-pregular text-base'
+        className='flex-1 text-base font-pregular text-gray-100'
         style={{ includeFontPadding: false }} // remove default font padding for vertical alignment of placeholder text.
         value={query}
         placeholder={isFocused ? undefined : placeholder}
