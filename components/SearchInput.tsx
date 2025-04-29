@@ -32,7 +32,7 @@ const SearchInput = ({ placeholder, initialQuery, ...props }: ISearchInput) => {
   const handleSearch = () => {
     // check if we have a query to search.
     if (!query?.trim()) {
-      handleError(new Error('Missing query'), 'You need to input something to search.');
+      handleError(new Error('Missing query'), { userMessage: 'You need to input something to search.' });
       return; // stop the function execution here if there's an error.
     }
 
