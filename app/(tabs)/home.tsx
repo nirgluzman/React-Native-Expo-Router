@@ -15,6 +15,7 @@ import {
 import { type Video } from '../../types/video';
 import { images } from '../../constants';
 
+import { useAuthContext } from '../../services/auth/auth.context';
 import { useFirestoreContext } from '../../services/db/firestore.context';
 
 import SearchInput from '../../components/SearchInput';
@@ -24,6 +25,8 @@ import VideoCard from '../../components/VideoCard';
 
 const Home = () => {
   const insets = useSafeAreaInsets();
+
+  const { user } = useAuthContext();
 
   const {
     documents: videoItems,
@@ -64,7 +67,7 @@ const Home = () => {
             <View className='flex-row items-start justify-between mb-6'>
               <View>
                 <Text className='font-pmedium text-sm text-gray-100'>Welcome Back</Text>
-                <Text className='font-psemibold text-2xl text-white'>Nir</Text>
+                <Text className='font-psemibold text-2xl text-white'>{user?.displayName}</Text>
               </View>
               <View className='my-auto'>
                 <Image source={images.logoSmall} className='w-9 h-10' resizeMode='contain' />
@@ -94,4 +97,5 @@ const Home = () => {
     </View>
   );
 };
+
 export default Home;
