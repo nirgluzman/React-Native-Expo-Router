@@ -5,13 +5,14 @@
 
 import { createContext, useContext, useState, useEffect, useCallback, type ReactNode } from 'react';
 
-import { DocumentData } from 'firebase/firestore';
+import { DocumentData, OrderByDirection, WhereFilterOp } from 'firebase/firestore';
 
 import {
   listenToCollectionService,
   getDocumentService,
   getDocumentsService,
   getTrendingDocumentsService,
+  getFilteredAndOrderedDocumentsService,
   addDocumentService,
   updateDocumentFieldsService,
   deleteDocumentService,
@@ -40,6 +41,11 @@ interface FirestoreContextType<T extends DocumentData> {
   refreshCollection: (options: QueryOptions<T>) => Promise<void>;
   refreshDocument: (documentId: string, forceServerFetch: boolean) => Promise<(T & { id: string }) | undefined>;
   getTrendingDocuments: (trendingField: string, count: number) => Promise<void>;
+  getFilteredAndOrderedDocuments: (
+    filter: { field: string; operator: WhereFilterOp; value: any },
+    sortBy: { field: string; direction: OrderByDirection },
+    queryLimit: number
+  ) => Promise<(T & { id: string })[] | undefined>;
   addDocument: (data: T) => Promise<void>;
   updateDocument: (documentId: string, data: T) => Promise<void>;
   deleteDocument: (documentId: string) => Promise<void>;
@@ -125,14 +131,14 @@ export const FirestoreContextProvider = <T extends DocumentData>({
             // Firestore listener errors - these errors occur asynchronously during the onSnapshot listener's operation,
             // and are not caught by try/catch block, which only handles errors during the listener's setup.
             setIsListening(false);
-            handleError(err, 'start real-time listener');
+            handleError(err); // start real-time listener.
           }
         );
 
         setListenerUnsubscribe(() => unsubscribe);
       } catch (err) {
         setIsListening(false);
-        handleError(err, 'setting up real-time listener');
+        handleError(err); // setting up real-time listener.
       }
     },
     [listenerUnsubscribe]
@@ -161,7 +167,7 @@ export const FirestoreContextProvider = <T extends DocumentData>({
           setDocuments(fetchedDocs);
         }
       } catch (err) {
-        handleError(err, 'refreshing collection');
+        handleError(err);
       } finally {
         // reset the fetching state to false, indicating the fetch is complete (regardless of success or failure).
         setIsLoading(false);
@@ -184,7 +190,7 @@ export const FirestoreContextProvider = <T extends DocumentData>({
       setIsLoading(false);
       return fetchedDoc;
     } catch (err) {
-      handleError(err, 'refreshing document');
+      handleError(err);
       setIsLoading(false);
       return undefined;
     }
@@ -198,65 +204,90 @@ export const FirestoreContextProvider = <T extends DocumentData>({
       const trendingDocs = await getTrendingDocumentsService<T>(collectionName, trendingField, count);
       setTrendingDocuments(trendingDocs);
     } catch (err) {
-      handleError(err, 'fetching trending documents');
+      handleError(err);
     } finally {
       setIsLoading(false);
     }
   }, []);
 
-  // add a new document
+  // fetch documents with specific filtering and sorting options.
+  const getFilteredAndOrderedDocuments = useCallback(
+    async (
+      filter: { field: string; operator: WhereFilterOp; value: any },
+      sortBy: {
+        field: string;
+        direction: OrderByDirection;
+      },
+      queryLimit: number
+    ) => {
+      setIsLoading(true);
+
+      try {
+        const fetchedDocs = await getFilteredAndOrderedDocumentsService<T>(collectionName, filter, sortBy, queryLimit);
+        setIsLoading(false);
+        return fetchedDocs;
+      } catch (err) {
+        handleError(err);
+        setIsLoading(false);
+        return undefined;
+      }
+    },
+    []
+  );
+
+  // add a new document.
   const addDocument = useCallback(async (data: T) => {
     setIsLoading(true);
 
     try {
       await addDocumentService<T>(collectionName, data);
     } catch (err) {
-      handleError(err, 'adding document');
+      handleError(err);
     } finally {
       // reset the fetching state to false, indicating the fetch is complete (regardless of success or failure).
       setIsLoading(false);
     }
   }, []);
 
-  // update an existing document
+  // update an existing document.
   const updateDocument = useCallback(async (documentId: string, data: T) => {
     setIsLoading(true);
 
     try {
       await updateDocumentFieldsService<T>(collectionName, documentId, data);
     } catch (err) {
-      handleError(err, 'updating document');
+      handleError(err);
     } finally {
       // reset the fetching state to false, indicating the fetch is complete (regardless of success or failure).
       setIsLoading(false);
     }
   }, []);
 
-  // delete a document
+  // delete a document.
   const deleteDocument = useCallback(async (documentId: string) => {
     setIsLoading(true);
 
     try {
       await deleteDocumentService<T>(collectionName, documentId);
     } catch (err) {
-      handleError(err, 'deleting document');
+      handleError(err);
     } finally {
       // reset the fetching state to false, indicating the fetch is complete (regardless of success or failure).
       setIsLoading(false);
     }
   }, []);
 
-  // filter documents by substring
+  // filter documents by substring.
   const filterBySubstring = useCallback((field: string, substring: string) => {
     setFilterOptions({ field, substring });
   }, []);
 
-  // clear all filters
+  // clear all filters.
   const clearFilters = useCallback(() => {
     setFilterOptions(null);
   }, []);
 
-  // clean up on unmount
+  // clean up on unmount.
   useEffect(() => {
     return () => {
       if (listenerUnsubscribe) {
@@ -265,7 +296,7 @@ export const FirestoreContextProvider = <T extends DocumentData>({
     };
   }, [listenerUnsubscribe]);
 
-  // Context value
+  // Context value.
   const contextValue: FirestoreContextType<T> = {
     documents,
     filteredDocuments,
@@ -277,6 +308,7 @@ export const FirestoreContextProvider = <T extends DocumentData>({
     refreshCollection,
     refreshDocument,
     getTrendingDocuments,
+    getFilteredAndOrderedDocuments,
     addDocument,
     updateDocument,
     deleteDocument,
@@ -287,7 +319,7 @@ export const FirestoreContextProvider = <T extends DocumentData>({
   return <FirestoreContext.Provider value={contextValue}>{children}</FirestoreContext.Provider>;
 };
 
-// custom hook for using the Firestore context
+// custom hook for using the Firestore context.
 export const useFirestoreContext = <T extends DocumentData>() => {
   const context = useContext(FirestoreContext);
 
