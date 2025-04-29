@@ -4,20 +4,25 @@
 
 import { createContext, useContext, useState, useCallback, type ReactNode } from 'react';
 
-import { FirebaseError } from '@firebase/util'; // subclass of the standard JavaScript Error object, with a 'code' property for specific Firebase errors.
+// subclass of the standard JavaScript Error object, with a 'code' property for specific Firebase errors.
+import { FirebaseError } from '@firebase/util';
 
-// format the Firebase error code.
-// https://firebase.google.com/docs/reference/js/auth#autherrorcodes (AuthErrorCodes)
-function formatFirebaseErrorCode(code: string) {
-  return code.replace('auth/', '').replace(/-/g, ' ');
-}
+// import the user-friendly error mappings from the new file
+import {
+  userFriendlyAuthErrorMap,
+  userFriendlyFirestoreErrorMap,
+  userFriendlyStorageErrorMap,
+} from './firebaseErrorMapping';
 
 interface ErrorContextType {
   hasError: boolean;
-  isFirebaseError: boolean;
-  error: FirebaseError | Error | null;
-  errorMessage: string | null; // user-friendly message.
-  handleError: (error: unknown, operation: string) => void;
+  displayError: {
+    title?: string; // optional title (e.g., "Authentication Error", "Database Error").
+    message: string; // user-friendly message.
+    code?: string; // optional technical code.
+    details?: string; // optional more technical details (e.g., original SDK message).
+  } | null;
+  handleError: (error: unknown, options?: { userMessage?: string }) => void;
   clearError: () => void;
 }
 
@@ -25,26 +30,78 @@ interface ErrorContextType {
 const ErrorContext = createContext<ErrorContextType | undefined>(undefined);
 
 export const ErrorContextProvider = ({ children }: { children: ReactNode }) => {
-  const [error, setError] = useState<FirebaseError | Error | null>(null);
+  const [errorState, setErrorState] = useState<{
+    raw: unknown;
+    display: ErrorContextType['displayError'];
+  } | null>(null);
 
-  const handleError = useCallback((err: unknown, customMessage: string) => {
-    setError(err instanceof FirebaseError ? err : new Error(`${customMessage}`));
+  const handleError = useCallback((err: unknown, options?: { userMessage?: string }) => {
+    let displayInfo: ErrorContextType['displayError'] = null;
+
+    if (err instanceof FirebaseError) {
+      const firebaseCode = err.code; // e.g., "auth/user-not-found", "firestore/permission-denied".
+      const [serviceId] = firebaseCode.split('/', 1); // get just the service prefix.
+
+      let userMessage = options?.userMessage; // start with potential custom message.
+      let title = 'Firebase Error'; // default title.
+
+      // determine service and look up specific message.
+      switch (serviceId) {
+        case 'auth':
+          userMessage = userFriendlyAuthErrorMap[firebaseCode] || userMessage;
+          title = 'Authentication Error';
+          break;
+        case 'firestore':
+          userMessage = userFriendlyFirestoreErrorMap[firebaseCode] || userMessage;
+          title = 'Database Error';
+          break;
+        case 'storage':
+          userMessage = userFriendlyStorageErrorMap[firebaseCode] || userMessage;
+          title = 'Storage Error';
+          break;
+
+        // add cases for other Firebase services (e.g., 'functions').
+
+        default:
+          // Code structure not recognized or service not mapped.
+          console.warn(`Unrecognized Firebase service ID or code format: ${firebaseCode}`);
+          // fallback will use the custom message if provided, otherwise default generic message.
+          break;
+      }
+
+      // final display message fallback if no specific or custom message was found.
+      const finalUserMessage = userMessage || `An unexpected error occurred (${firebaseCode}).`;
+
+      displayInfo = {
+        title: title,
+        message: finalUserMessage,
+        code: firebaseCode, // always include the technical code.
+        details: err.message, // original SDK message as details.
+      };
+    } else if (err instanceof Error) {
+      displayInfo = {
+        title: 'An Error Occurred',
+        message: options?.userMessage || err.message || 'Something went wrong.', // use custom, original, or generic.
+        details: err.message,
+      };
+    } else {
+      displayInfo = {
+        title: 'An Unknown Error Occurred',
+        message: options?.userMessage || 'An unexpected error occurred.', // use custom or generic.
+        details: String(err), // convert unknown to string for details.
+      };
+    }
+
+    setErrorState({ raw: err, display: displayInfo });
   }, []);
 
   const clearError = useCallback(() => {
-    setError(null);
+    setErrorState(null);
   }, []);
 
-  const errorMessage =
-    error instanceof FirebaseError
-      ? `Firebase error (${formatFirebaseErrorCode(error.code)}): ${error.message}`
-      : error?.message ?? null;
-
   const contextValue: ErrorContextType = {
-    hasError: error !== null,
-    isFirebaseError: error instanceof FirebaseError,
-    error,
-    errorMessage,
+    hasError: errorState !== null,
+    displayError: errorState?.display ?? null,
     handleError,
     clearError,
   };
