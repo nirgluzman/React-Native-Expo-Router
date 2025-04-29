@@ -4,7 +4,7 @@
 import { initializeApp } from 'firebase/app';
 
 // import services, https://firebase.google.com/docs/web/setup#available-libraries
-import { initializeAuth, getReactNativePersistence } from 'firebase/auth';
+import { initializeAuth, getReactNativePersistence, debugErrorMap } from 'firebase/auth';
 import { getFirestore } from 'firebase/firestore';
 
 import ReactNativeAsyncStorage from '@react-native-async-storage/async-storage';
@@ -29,6 +29,7 @@ const app = initializeApp(firebaseConfig);
 // Auth state will default to memory persistence and will not persist between sessions.
 //
 export const auth = initializeAuth(app, {
+  errorMap: debugErrorMap, // mapping of error codes to error messages - useful for debugging; https://firebase.google.com/docs/reference/js/auth.autherrormap.md#autherrormap_interface
   persistence: getReactNativePersistence(ReactNativeAsyncStorage),
 });
 
