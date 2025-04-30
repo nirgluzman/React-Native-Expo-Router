@@ -156,3 +156,9 @@ https://www.npmjs.com/package/react-native-animatable/ <br/>
 https://www.scaler.com/topics/react-native-animatable/
 
 - Library to create smooth, declarative animations in React Native applications.
+
+## Expo DocumentPicker
+
+https://docs.expo.dev/versions/latest/sdk/document-picker/
+
+- A library that provides access to the system's UI for selecting documents from the available providers on the user's device.
