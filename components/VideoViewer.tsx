@@ -4,7 +4,7 @@
 // It handles video playback, error handling, and provides native video controls.
 //
 
-import { Alert, Image, View, TouchableOpacity } from 'react-native';
+import { Alert, Image, View, TouchableOpacity, ImageSourcePropType } from 'react-native';
 
 import { useEvent, useEventListener } from 'expo';
 import { useVideoPlayer, VideoView, VideoPlayer } from 'expo-video';
@@ -12,7 +12,7 @@ import { useVideoPlayer, VideoView, VideoPlayer } from 'expo-video';
 import { icons } from '../constants';
 
 interface IVideoViewer {
-  thumbnail: string;
+  thumbnail: ImageSourcePropType; // Image source (either a remote URL or a local file resource).
   videoUrl: string;
   containerStyles: string; // Tailwind CSS class names for styling the container.
 }
@@ -66,7 +66,11 @@ const VideoViewer = ({ thumbnail, videoUrl, containerStyles }: IVideoViewer) => 
           onPress={() => videoPlayer.play()}
           className={`overflow-hidden relative ${containerStyles}`}>
           {/* 'position' in React Native is similar to regular CSS, but everything is set to 'relative' by default. */}
-          <Image source={{ uri: thumbnail }} className='w-full h-full' resizeMode='cover' />
+          <Image
+            source={typeof thumbnail === 'string' ? { uri: thumbnail } : thumbnail}
+            className='w-full h-full'
+            resizeMode='cover'
+          />
           <Image source={icons.play} className='w-12 h-12 absolute' resizeMode='contain' />
         </TouchableOpacity>
       )}
