@@ -12,8 +12,6 @@ import {
   // NOTE: Expo Router adds the <SafeAreaProvider> to every route; this setup is not needed (see: https://www.nativewind.dev/tailwind/new-concepts/safe-area-insets).
 } from 'react-native-safe-area-context';
 
-import { WhereFilterOp, OrderByDirection } from 'firebase/firestore';
-
 import type { Video, VideoWithId } from '../../types/video';
 import { icons } from '../../constants';
 
@@ -33,8 +31,8 @@ const Profile = () => {
 
   const { getFilteredAndOrderedDocuments: onPullToRefresh } = useFirestoreContext<Video>();
 
-  const filter = { field: 'creator.username', operator: '==' as WhereFilterOp, value: user!.displayName };
-  const sortBy = { field: 'timestamp', direction: 'desc' as OrderByDirection };
+  const filter = { field: 'creator.username', operator: '==', value: user!.displayName };
+  const sortBy = { field: 'timestamp', direction: 'desc' };
   const queryLimit = 10; // NOTE: 'queryLimit' is hardcoded for development purposes.
 
   useEffect(() => {
