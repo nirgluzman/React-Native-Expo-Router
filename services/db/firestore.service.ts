@@ -8,11 +8,10 @@ import { db } from '../../config/firebase/firebaseConfig';
 import {
   // Document References (Pointers to Documents)
   doc, // Create a DocumentReference.
-  DocumentReference, // Type: Document location in Firestore.
 
   // Collection References (Pointers to Collections)
   collection,
-  CollectionReference,
+  FirebaseFirestoreTypes,
 
   // Document Operations (Single Document)
   getDoc, // Fetch a single document from the server.
@@ -37,22 +36,23 @@ import {
   // Realtime Updates
   onSnapshot, // Listen for realtime document changes.
 
-  // Data Types & Snapshots
-  DocumentSnapshot, // Metadata & data of a single document.
-  DocumentData, // The raw data of a document (key-value pairs).
-  QuerySnapshot, // Results of a query (multiple documents).
-  QueryDocumentSnapshot, // Data of a single document in a query result.
-
   // Query Configuration Types
   OrderByDirection, // 'asc' or 'desc' for sorting.
-  WhereFilterOp, // Operators for filtering (e.g., '==', '>', '<').
   QueryConstraint, // Generic query constraint type.
-} from 'firebase/firestore';
+} from '@react-native-firebase/firestore';
+
+type DocumentData = FirebaseFirestoreTypes.DocumentData; // raw data of a document (key-value pairs).
+type DocumentReference<T extends DocumentData = DocumentData> = FirebaseFirestoreTypes.DocumentReference<T>; // Document location in Firestore.
+type CollectionReference<T extends DocumentData = DocumentData> = FirebaseFirestoreTypes.CollectionReference<T>;
+type DocumentSnapshot<T extends DocumentData = DocumentData> = FirebaseFirestoreTypes.DocumentSnapshot<T>; // Metadata & data of a single document.
+type QuerySnapshot<T extends DocumentData = DocumentData> = FirebaseFirestoreTypes.QuerySnapshot<T>; // results of a query (multiple documents).
+type QueryDocumentSnapshot<T extends DocumentData = DocumentData> = FirebaseFirestoreTypes.QueryDocumentSnapshot<T>; // data of a single document in a query result.
+type WhereFilterOp = FirebaseFirestoreTypes.WhereFilterOp; // operators for filtering (e.g., '==', '>', '<').
 
 import { FirebaseError } from '@firebase/util'; // subclass of the standard JavaScript Error object (in addition to a message string and stack trace, it contains a string code).
 
 // type definitions for query options.
-export interface QueryOptions<T extends DocumentData | null> {
+export interface QueryOptions<T extends DocumentData> {
   // ordering.
   orderByField?: string;
   orderDirection?: OrderByDirection;
@@ -107,7 +107,7 @@ const buildQuery = <T extends DocumentData>(collectionRef: CollectionReference<T
   }
 
   if (options.endBeforeDoc) {
-    queryConstraints.push(endBefore(options.endBeforeDoc));
+    queryConstraints.push(endBefore(options.endBeforeDoc.id));
   }
 
   return query(collectionRef, ...queryConstraints);
@@ -156,7 +156,7 @@ export const listenToCollectionService = <T extends DocumentData>(
       // handle Firestore listener errors; these errors occur asynchronously during the onSnapshot listener's operation.
       // https://firebase.google.com/docs/firestore/query-data/listen#handle_listen_errors
       if (errorCallback) {
-        errorCallback(err);
+        errorCallback(err as FirebaseError);
       } else {
         console.error('Firestore listener error:', err);
       }
@@ -352,7 +352,7 @@ export const updateDocumentFieldsService = async <T extends DocumentData>(
   const documentData = {
     ...data,
     timestamp: data.timestamp || new Date().getTime(),
-  };
+  } as DocumentData;
 
   const docRef = createDocumentReference<T>(collectionName, documentId); // create a reference to the document with documentId.
 

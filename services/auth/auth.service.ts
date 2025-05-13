@@ -11,8 +11,10 @@ import {
   signInWithEmailAndPassword,
   signOut,
   updateProfile,
-  type User as FirebaseUser,
-} from 'firebase/auth';
+  type FirebaseAuthTypes,
+} from '@react-native-firebase/auth';
+
+type FirebaseUser = FirebaseAuthTypes.User;
 
 // sets up a listener for authentication state changes.
 export const listenAuthState = (callback: (user: FirebaseUser | null) => void) => {

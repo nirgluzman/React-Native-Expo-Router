@@ -4,13 +4,15 @@
 
 import { useState, useEffect, createContext, useContext, type ReactNode } from 'react';
 
-import { type User as FirebaseUser } from 'firebase/auth';
+import { type FirebaseAuthTypes } from '@react-native-firebase/auth';
 import { FirebaseError } from '@firebase/util'; // subclass of the standard JavaScript Error object. In addition to a message string and stack trace, it contains a string code.
 
 // imports the custom hook for accessing the global error management context.
 import { useErrorContext } from '../error/error.context';
 
 import { listenAuthState, signInRequest, signUpRequest, logoutRequest } from './auth.service';
+
+type FirebaseUser = FirebaseAuthTypes.User;
 
 // define the context value type.
 type AuthContextType = {

@@ -1,37 +1,39 @@
-// for more information on how to access Firebase in your project, see the Firebase documentation:
-// https://firebase.google.com/docs/web/setup#access-firebase
+//
+// Firebase config file
+//
 
-import { initializeApp } from 'firebase/app';
+import { getApp, setReactNativeAsyncStorage } from '@react-native-firebase/app';
 
 // import services, https://firebase.google.com/docs/web/setup#available-libraries
-import { initializeAuth, getReactNativePersistence, debugErrorMap } from 'firebase/auth';
-import { getFirestore } from 'firebase/firestore';
+import { getAuth } from '@react-native-firebase/auth';
+import { getFirestore } from '@react-native-firebase/firestore';
+import { getStorage } from '@react-native-firebase/storage';
 
 import ReactNativeAsyncStorage from '@react-native-async-storage/async-storage';
 
-// app's Firebase configuration.
-const firebaseConfig = {
-  apiKey: process.env.EXPO_PUBLIC_FIREBASE_API_KEY,
-  authDomain: process.env.EXPO_PUBLIC_FIREBASE_AUTH_DOMAIN,
-  projectId: process.env.EXPO_PUBLIC_FIREBASE_PROJECT_ID,
-  storageBucket: process.env.EXPO_PUBLIC_FIREBASE_STORAGE_BUCKET,
-  messagingSenderId: process.env.EXPO_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
-  appId: process.env.EXPO_PUBLIC_FIREBASE_APP_ID,
-};
+// // app's Firebase configuration for web.
+// const firebaseConfig = {
+//   apiKey: process.env.EXPO_PUBLIC_FIREBASE_API_KEY!,
+//   authDomain: process.env.EXPO_PUBLIC_FIREBASE_AUTH_DOMAIN!,
+//   projectId: process.env.EXPO_PUBLIC_FIREBASE_PROJECT_ID!,
+//   storageBucket: process.env.EXPO_PUBLIC_FIREBASE_STORAGE_BUCKET!,
+//   messagingSenderId: process.env.EXPO_PUBLIC_FIREBASE_MESSAGING_SENDER_ID!,
+//   appId: process.env.EXPO_PUBLIC_FIREBASE_APP_ID!,
+// };
+
+// configure the AsyncStorage to be used to persist user sessions, https://rnfirebase.io/platforms#async-storage
+setReactNativeAsyncStorage(ReactNativeAsyncStorage);
 
 // initialize Firebase.
-const app = initializeApp(firebaseConfig);
+const app = getApp();
 
 // initialize Firebase Authentication and get a reference to the service.
-//
-// NOTE - persist auth state in AsyncStorage:
-// with `getAuth` we're initializing Firebase Auth for React Native without providing AsyncStorage.
-// Auth state will default to memory persistence and will not persist between sessions.
-//
-export const auth = initializeAuth(app, {
-  errorMap: debugErrorMap, // mapping of error codes to error messages - useful for debugging; https://firebase.google.com/docs/reference/js/auth.autherrormap.md#autherrormap_interface
-  persistence: getReactNativePersistence(ReactNativeAsyncStorage),
-});
+const auth = getAuth(app);
 
-// initialize Firestore and get a reference to the service
-export const db = getFirestore(app);
+// initialize Firestore and get a reference to the service.
+const db = getFirestore(app);
+
+// initialize Cloud Storage and get a reference to the service.
+const storage = getStorage(app);
+
+export { app, auth, db, storage };
