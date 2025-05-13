@@ -26,6 +26,7 @@ import { type Video } from '../types/video';
 
 import { ErrorContextProvider } from '../services/error/error.context';
 import { AuthContextProvider } from '../services/auth/auth.context';
+import { StorageContextProvider } from '../services/storage/storage.context';
 import { FirestoreContextProvider } from '../services/db/firestore.context';
 
 import ErrorAlert from '../components/ErrorAlert';
@@ -70,21 +71,23 @@ const RootLayout = () => {
       <ErrorContextProvider>
         <ErrorAlert />
         <AuthContextProvider>
-          <FirestoreContextProvider<Video> collectionName={collectionName}>
-            <Stack
-              screenOptions={{
-                headerShown: false,
-                animation: 'none',
-                // for fixing white background flicker in Stack navigation transitions.
-                presentation: 'transparentModal',
-                contentStyle: { backgroundColor: colors.primary }, // style object for the scene content.
-              }}>
-              <Stack.Screen name='index' />
-              <Stack.Screen name='(auth)' />
-              <Stack.Screen name='(tabs)' />
-              <Stack.Screen name='search/[query]' />
-            </Stack>
-          </FirestoreContextProvider>
+          <StorageContextProvider>
+            <FirestoreContextProvider<Video> collectionName={collectionName}>
+              <Stack
+                screenOptions={{
+                  headerShown: false,
+                  animation: 'none',
+                  // for fixing white background flicker in Stack navigation transitions.
+                  presentation: 'transparentModal',
+                  contentStyle: { backgroundColor: colors.primary }, // style object for the scene content.
+                }}>
+                <Stack.Screen name='index' />
+                <Stack.Screen name='(auth)' />
+                <Stack.Screen name='(tabs)' />
+                <Stack.Screen name='search/[query]' />
+              </Stack>
+            </FirestoreContextProvider>
+          </StorageContextProvider>
         </AuthContextProvider>
       </ErrorContextProvider>
     </>
