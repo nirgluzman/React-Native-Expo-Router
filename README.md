@@ -1,8 +1,8 @@
 # Expo Router Sample Application
 
-https://github.com/nirgluzman/React-Native-Expo-Router.git
-https://www.youtube.com/watch?v=ZBCUegTZF7M
-https://resource.jsmastery.pro/aora-design (Figma design)
+https://github.com/nirgluzman/React-Native-Expo-Router.git <br/>
+https://www.youtube.com/watch?v=ZBCUegTZF7M <br/>
+https://resource.jsmastery.pro/aora-design (Figma design) <br/>
 
 ## NativeWind
 
@@ -10,6 +10,18 @@ https://www.nativewind.dev/ <br/>
 https://medium.com/@hychandima2000/understanding-the-folder-structure-of-a-react-native-project-using-expo-and-nativewind-272d656740f4
 
 - Use [Tailwind CSS](https://tailwindcss.com/) to style our components in React Native.
+
+## React Native Firebase SDK
+
+https://rnfirebase.io/ <br />
+https://firebase.blog/posts/2023/03/which-react-native-firebase-sdk-to-use/
+
+- **[Supported environments for the Firebase JavaScript SDK](https://firebase.google.com/docs/web/environments-js-sdk#other_environments)**
+- For dedicated React Native (Android/iOS) applications requiring the full suite of Firebase features and optimal mobile performance, <br/>
+the **[React Native Firebase SDK](https://rnfirebase.io/)** is the preferred choice. It provides access to native functionalities and is specifically tailored for the mobile environment.
+- If we're developing a cross-platform application with React Native that includes a web version, or if we're using Expo Go, the **[Firebase JavaScript SDK](https://firebase.google.com/docs/reference/js)** can be a viable option. <br/>
+While it might lack some mobile-specific features, it allows for code reuse across platforms. <br/>
+For certain services like Authentication and Firestore, there are React Native-specific bundles within the JavaScript SDK to enhance compatibility.
 
 ## Expo Router
 
@@ -157,8 +169,17 @@ https://www.scaler.com/topics/react-native-animatable/
 
 - Library to create smooth, declarative animations in React Native applications.
 
-## Expo DocumentPicker
+## Interacting with Files on the User's Device
 
-https://docs.expo.dev/versions/latest/sdk/document-picker/
+- [DocumentPicker](https://docs.expo.dev/versions/latest/sdk/document-picker/) <br/>
+Allow users to select any type of document from their device's file system or cloud storage providers (like iCloud Drive, Google Drive, etc.); it is not limited to just images and videos.
 
-- A library that provides access to the system's UI for selecting documents from the available providers on the user's device.
+- [ImagePicker](https://docs.expo.dev/versions/latest/sdk/imagepicker/) <br/>
+Focused on allowing users to select images and videos from their device's media library or capture new ones using the camera.
+
+- [MediaLibrary](https://docs.expo.dev/versions/latest/sdk/media-library/) <br/>
+Provides broader access to the user's entire media library, including photos, videos, and albums. <br/>
+It does not present the default picker UI. Instead, it provides an API for developers to query and interact with the media library's contents programmatically.
+
+- [FileSystem](https://docs.expo.dev/versions/latest/sdk/filesystem/) <br/>
+Provides access to a file system stored locally on the device. It is also capable of uploading and downloading files from network URLs.
