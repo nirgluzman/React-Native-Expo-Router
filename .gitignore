@@ -35,3 +35,9 @@ yarn-error.*
 
 # typescript
 *.tsbuildinfo
+
+# Google Service-Account file (Firebase App-Distribution-Admin)
+firebase-appDistributionAdmin-sa.json
+
+# Client-side Android app config file for Firebase
+google-services.json
