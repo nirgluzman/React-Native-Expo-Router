@@ -1,0 +1,83 @@
+# GitHub Actions workflow to create an Expo/Android Development Build with EAS.
+# https://github.com/expo/expo-github-action
+#
+
+name: EAS Build
+
+on:
+  workflow_dispatch: # allows manual triggering of the workflow from the GitHub Actions tab.
+    inputs:
+      release_notes:
+        type: string
+        required: false
+        description: Release Notes
+        default: 'Development build'
+      platform:
+        type: choice
+        required: false
+        description: Platform to build for
+        options:
+          - android
+          - ios
+        default: 'android' # default value for the input
+      profile:
+        type: choice
+        required: false
+        description: Build profile to use
+        options:
+          - development
+          - preview
+          - production
+        default: 'development' # default value for the input
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Setup repo
+        uses: actions/checkout@v4 # checks out the repository to the runner
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22.x'
+          cache: npm
+
+      # - name: Install dependencies - enforce the versions specified in lockfile
+      #   run: npm ci
+      - name: Install Expo DevClient for development build
+        run: npm install expo-dev-client
+
+      # https://github.com/expo/fyi/blob/main/eas-build-archive.md
+      - name: Setup EAS
+        uses: expo/expo-github-action@v8
+        with:
+          eas-version: latest # EAS CLI version
+          token: ${{ secrets.EXPO_TOKEN }} # uses a GitHub secret for Expo authentication.
+          eas-cache: true
+
+      - name: Load Google Service file
+        env:
+          DATA: ${{ secrets.GOOGLE_SERVICES_JSON_BASE64 }}
+        run: |
+          echo $DATA | base64 -di > ${{ github.workspace }}/google-services.json
+
+      - name: Build Android app
+        run: |
+          eas build --local \
+          --non-interactive \
+          --platform=${{ github.event.inputs.platform }} \
+          --profile=${{ github.event.inputs.profile }} \
+          --output ${{ github.workspace }}/app-${{ github.event.inputs.profile }}-build.apk
+
+      # https://github.com/marketplace/actions/firebase-app-distribution
+      # https://github.com/wzieba/Firebase-Distribution-Github-Action/wiki/FIREBASE_TOKEN-migration
+      # https://firebase.google.com/docs/app-distribution/authenticate-service-account?platform=android
+      - name: Upload APK artifact to Firebase App Distribution
+        uses: wzieba/Firebase-Distribution-Github-Action@v1
+        with:
+          appId: ${{ secrets.FIREBASE_ANDROID_APP_ID_DEV }}
+          serviceCredentialsFileContent: ${{ secrets.FIREBASE_APP_DISTRIBUTION_ADMIN_SA }} # Firebase App-Distribution-Admin SA
+          groups: dev
+          file: ${{ github.workspace }}/app-${{ github.event.inputs.profile }}-build.apk
+          releaseNotes: ${{ inputs.release_notes }}
