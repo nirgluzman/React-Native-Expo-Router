@@ -5,8 +5,8 @@
 //
 
 // Import specific error code enums from relevant services
-import { AuthErrorCodes } from 'firebase/auth';
-import { StorageErrorCode } from 'firebase/storage';
+import { AuthErrorCodes } from '@react-native-firebase/auth';
+import { StorageErrorCode } from '@react-native-firebase/storage';
 
 // --- User-Friendly Mappings for Different Services ---
 // These maps translate specific Firebase error codes (strings) into user-friendly messages displayed in the application.
@@ -71,6 +71,7 @@ export const userFriendlyFirestoreErrorMap: Record<string, string> = {
   // ... add other specific codes if needed
 };
 
+// https://firebase.google.com/docs/storage/web/handle-errors
 export const userFriendlyStorageErrorMap: Record<string, string> = {
   // Storage errors
   [StorageErrorCode.OBJECT_NOT_FOUND]: 'The requested file was not found.',
