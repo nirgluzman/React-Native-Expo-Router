@@ -11,7 +11,7 @@ https://medium.com/@hychandima2000/understanding-the-folder-structure-of-a-react
 
 - Use [Tailwind CSS](https://tailwindcss.com/) to style our components in React Native.
 
-## React Native Firebase SDK
+## React Native Firebase (RNFirebase) SDK
 
 https://rnfirebase.io/ <br />
 https://firebase.blog/posts/2023/03/which-react-native-firebase-sdk-to-use/
@@ -22,6 +22,29 @@ the **[React Native Firebase SDK](https://rnfirebase.io/)** is the preferred cho
 - If we're developing a cross-platform application with React Native that includes a web version, or if we're using Expo Go, the **[Firebase JavaScript SDK](https://firebase.google.com/docs/reference/js)** can be a viable option. <br/>
 While it might lack some mobile-specific features, it allows for code reuse across platforms. <br/>
 For certain services like Authentication and Firestore, there are React Native-specific bundles within the JavaScript SDK to enhance compatibility.
+
+## Client-side Android app config file for Firebase (google-services.json)
+
+- When working with React Native Firebase (RNFirebase), the `google-services.json` file is absolutely essential for Android/iOS applications. <br />
+Unlike the Firebase Web SDK, which runs entirely in JavaScript, RNFirebase leverages the platform-specific Firebase libraries.
+- The `google-services.json` file contains crucial configuration information that the native Android Firebase SDKs need to connect to your specific Firebase project (like: Firebase project ID, API keys, Storage bucket URL).
+- Without this file, the native Android app wouldn't know which Firebase project to communicate with, leading to errors or complete failure of Firebase services.
+- Many Firebase services, especially those involving authentication (like Google Sign-In or phone number authentication) and messaging (Firebase Cloud Messaging), rely on specific configurations provided by this file.
+- It's important to remember that `google-services.json` is specifically for **Android**. <br />
+For **iOS**, the equivalent configuration file is `GoogleService-Info.plist`. <br />
+Both serve the same purpose of linking our native app to our Firebase project, but their formats and usage differ based on the platform's build system.
+
+- Encode the file as `base64` on our local computer so that it may be easily stored in an environment variable.
+
+```bash
+base64 -w 0 google-services.json
+```
+
+## Build lifecycle hooks
+
+https://docs.expo.dev/build-reference/npm-hooks/ <br />
+https://github.com/expo/eas-cli/issues/1253
+
 
 ## Expo Router
 
