@@ -1,0 +1,48 @@
+# Configure EAS to ignore unnecessary files during the build process.
+# Include files with our EAS Build upload that are not committed to source control (e.g. google-services.json)
+#
+# https://docs.expo.dev/build-reference/easignore/
+# https://github.com/expo/fyi/blob/main/eas-build-archive.md#how-can-i-upload-files-to-eas-build-if-they-are-gitignored
+#
+
+#--------------------------------------------------------------
+# .gitignore
+#--------------------------------------------------------------
+# dependencies
+node_modules/
+
+# Expo
+.expo/
+dist/
+web-build/
+expo-env.d.ts
+
+# Native
+*.orig.*
+*.jks
+*.p8
+*.p12
+*.key
+*.mobileprovision
+
+# Metro
+.metro-health-check*
+
+# debug
+npm-debug.*
+yarn-debug.*
+yarn-error.*
+
+# macOS
+.DS_Store
+*.pem
+
+# local env files
+.env
+.env*.local
+
+# typescript
+*.tsbuildinfo
+
+# Google Service-Account file (Firebase App-Distribution-Admin)
+firebase-appDistributionAdmin-sa.json
