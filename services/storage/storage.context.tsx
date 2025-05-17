@@ -3,18 +3,16 @@
 //
 // Common storage operations such as uploading, deleting, and listing files, abstracting the direct Firebase Storage SDK calls.
 //
-// https://rnfirebase.io/auth/usage
-// https://firebase.google.com/docs/storage/web/start
-// https://github.com/expo/examples/tree/master/with-firebase-storage-upload
+// https://rnfirebase.io/storage/usage --> This method is deprecated !!!
+// https://rnfirebase.io/reference/storage
+// https://rnfirebase.io/migrating-to-v22
 //
 
 import { createContext, useContext, useCallback, type ReactNode } from 'react';
 
-import { storage } from '../../config/firebase/firebaseConfig';
-import { ref as storageRef, uploadBytes, getDownloadURL, deleteObject } from '@react-native-firebase/storage';
+import storage from '@react-native-firebase/storage';
 
-// https://docs.expo.dev/versions/latest/sdk/expo/#api
-import { fetch } from 'expo/fetch';
+import { File } from 'expo-file-system/next';
 
 import { useErrorContext } from '../error/error.context';
 
@@ -36,15 +34,16 @@ export const StorageContextProvider = ({ children }: { children: ReactNode }) =>
       path: string // string representing where the file should be stored.
     ) => {
       try {
-        const fetchResult = await fetch(fileUri); // retrieve the file located at fileUri.
-        const blob = await fetchResult.blob(); // convert the response into a Blob object.
+        // // https://www.reddit.com/r/reactnative/comments/1k15xo8/can_i_create_a_blob_in_react_native/
+        // // https://docs.expo.dev/versions/v53.0.0/sdk/filesystem-next/#uploading-files-using-expofetch
+        // const file = new File(fileUri);
+        // const blob = await file.blob(); // convert the response into a Blob object.
 
-        // upload to Firebase/Storage.
-        const fileRef = storageRef(storage, path); // reference to where the file will be stored.
-        const snapshot = await uploadBytes(fileRef, blob); // upload the file.
+        const reference = storage().ref(path); // storage reference to not yet existing file
+        await reference.putFile(fileUri); // upload file
 
         // return the public URL where the file can be accessed.
-        const downloadURL = await getDownloadURL(snapshot.ref);
+        const downloadURL = await reference.getDownloadURL();
         return downloadURL;
       } catch (err) {
         handleError(err);
@@ -57,11 +56,11 @@ export const StorageContextProvider = ({ children }: { children: ReactNode }) =>
 
   // delete a file from Firebase Storage given its path.
   const deleteFile = useCallback(async (path: string) => {
-    const fileRef = storageRef(storage, path); // reference to the file to delete.
+    const fileRef = storage().ref(path); // reference to the file to delete.
 
     try {
       // delete the file.
-      return await deleteObject(fileRef);
+      return await fileRef.delete();
     } catch (err) {
       handleError(err);
     }
