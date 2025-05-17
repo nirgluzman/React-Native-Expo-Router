@@ -40,6 +40,7 @@ export const ErrorContextProvider = ({ children }: { children: ReactNode }) => {
 
     if (err instanceof FirebaseError) {
       const firebaseCode = err.code; // e.g., "auth/user-not-found", "firestore/permission-denied".
+      const firebaseMessage = err.message;
       const [serviceId] = firebaseCode.split('/', 1); // get just the service prefix.
 
       let userMessage = options?.userMessage; // start with potential custom message.
@@ -48,15 +49,18 @@ export const ErrorContextProvider = ({ children }: { children: ReactNode }) => {
       // determine service and look up specific message.
       switch (serviceId) {
         case 'auth':
-          userMessage = userFriendlyAuthErrorMap[firebaseCode] || userMessage;
+          // userMessage = userFriendlyAuthErrorMap[firebaseCode] || userMessage;
+          userMessage = firebaseMessage || userMessage;
           title = 'Authentication Error';
           break;
         case 'firestore':
-          userMessage = userFriendlyFirestoreErrorMap[firebaseCode] || userMessage;
+          // userMessage = userFriendlyFirestoreErrorMap[firebaseCode] || userMessage;
+          userMessage = firebaseMessage || userMessage;
           title = 'Database Error';
           break;
         case 'storage':
-          userMessage = userFriendlyStorageErrorMap[firebaseCode] || userMessage;
+          // userMessage = userFriendlyStorageErrorMap[firebaseCode] || userMessage;
+          userMessage = firebaseMessage || userMessage;
           title = 'Storage Error';
           break;
 
